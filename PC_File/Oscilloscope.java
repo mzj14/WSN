@@ -49,7 +49,7 @@ public class Oscilloscope implements MessageListener
 
     /* Main entry point */
     void run() {
-    System.out.println("Pc application run");
+    System.out.println("PC File application run");
     data = new Data(this);
     window = new Window(this);
     window.setup();
@@ -87,7 +87,7 @@ public class Oscilloscope implements MessageListener
         // }
 
         /* Update interval and mote data */
-        // periodUpdate(omsg.get_version(), omsg.get_interval());
+        periodUpdate(omsg.get_version(), omsg.get_interval());
         // data.update(omsg.get_id(), omsg.get_count(), omsg.get_readings());
 
         /* Inform the GUI that new data showed up */
