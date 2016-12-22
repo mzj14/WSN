@@ -83,7 +83,7 @@ implementation
   event message_t* Receive.receive(message_t* msg, void* payload, uint8_t len) {
     oscilloscope_t *omsg = payload;
 
-    report_received();
+    // report_received();
 
     /* If we receive a newer version, update our interval.
        If we hear from a future count, jump ahead but suppress our own change
@@ -96,6 +96,7 @@ implementation
     // restart timer
 	startTimer();
     // report_problem();
+        report_received();
       }
 
     /*
@@ -136,12 +137,17 @@ implementation
 	  // suppressCountChange = FALSE;
     }
     local.count++;
+    /*
     if (call ReadLight.read() != SUCCESS)
       report_problem();
     if (call ReadTemperature.read() != SUCCESS)
       report_problem();
     if (call ReadHumidity.read() != SUCCESS)
       report_problem();
+    */
+    call ReadLight.read();
+    call ReadTemperature.read();
+    call ReadHumidity.read();
     local.current_time = call Timer.getNow();
     reading++;
   }

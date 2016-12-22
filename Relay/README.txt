@@ -1,42 +1,58 @@
-README for Oscilloscope
+README for BaseStation
 Author/Contact: tinyos-help@millennium.berkeley.edu
 
 Description:
 
-Oscilloscope is a simple data-collection demo. It periodically samples
-the default sensor and broadcasts a message over the radio every 10
-readings. These readings can be received by a BaseStation mote and
-displayed by the Java "Oscilloscope" application found in the java
-subdirectory. The sampling rate starts at 4Hz, but can be changed from
-the Java application.
+BaseStation is an application that acts as a simple Active Message
+bridge between the serial and radio links. It replaces the GenericBase
+of TinyOS 1.0 and the TOSBase of TinyOS 1.1.
 
-You can compile Oscilloscope with a sensor board's default sensor by compiling
-as follows:
-  SENSORBOARD=<sensorboard name> make <mote>
+On the serial link, BaseStation sends and receives simple active
+messages (not particular radio packets): on the radio link, it sends
+radio active messages, whose format depends on the network stack being
+used. BaseStation will copy its compiled-in group ID to messages
+moving from the serial link to the radio, and will filter out incoming
+radio messages that do not contain that group ID.
 
-You can change the sensor used by editing OscilloscopeAppC.nc.
+BaseStation includes queues in both directions, with a guarantee that
+once a message enters a queue, it will eventually leave on the other
+interface. The queues allow the BaseStation to handle load spikes more
+gracefully.
+
+BaseStation acknowledges a message arriving over the serial link only if
+that message was successfully enqueued for delivery to the radio link.
+
+The LEDS are programmed to toggle as follows:
+
+RED Toggle         - Message bridged from serial to radio
+GREEN Toggle       - Message bridged from radio to serial
+YELLOW/BLUE Toggle - Dropped message due to queue overflow 
+                     in either direction
+
+When using a CC2420 radio, several default preprocessor configurations
+are defined in the Makefile:
+  * CC2420_NO_ACKNOWLEDGEMENTS
+    - Prevents the base station from falsly acknowledging packets
+  * CC2420_NO_ADDRESS_RECOGNITION
+    - Allows the base station to sniff packets from any transmitter
+
+Other combinations can be defined to meet your application's needs:
+  * CC2420_NO_ADDRESS_RECOGNITION only
+    - Sniff all packets, but acknowledge packets only if they
+      are sent to the base station's address
+
+  * Removing all preprocessor definitions in the Makefile
+    - Only accept packets destined for the base station's address,
+      and acknowledge those packets
+
 
 Tools:
 
-To display the readings from Oscilloscope motes, install the BaseStation
-application on a mote connected to your PC's serial port. Then run the 
-Oscilloscope display application found in the java subdirectory, as
-follows:
-  cd java
-  make
-  java net.tinyos.sf.SerialForwarder -comm serial@<serial port>:<mote>
-  # e.g., java net.tinyos.sf.SerialForwarder -comm serial@/dev/ttyUSB0:mica2
-  # or java net.tinyos.sf.SerialForwarder -comm serial@COM2:telosb
-  ./run
+support/sdk/java/net/tinyos/sf/SerialForwarder  
 
-The controls at the bottom of the screen allow you to zoom in or out the X
-axis, change the range of the Y axis, and clear all received data. You can
-change the color used to display a mote by clicking on its color in the
-mote table.
+See the TinyOS Tutorial on Mote-PC serial communication and
+SerialForwarder on docs.tinyos.net for more details.
 
 Known bugs/limitations:
 
-None.
 
-
-$Id: README.txt,v 1.6 2008/07/25 03:01:45 regehr Exp $
