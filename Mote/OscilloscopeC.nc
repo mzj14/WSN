@@ -22,7 +22,7 @@ module OscilloscopeC @safe()
     interface Boot;
     interface SplitControl as RadioControl;
     interface AMSend;
-    // interface Receive;
+    interface Receive;
     interface Timer<TMilli>;
     interface Read<uint16_t> as ReadLight;
     interface Read<uint16_t> as ReadTemperature;
@@ -79,7 +79,7 @@ implementation
   }
 
   // receive message from radio
-  /*
+
   event message_t* Receive.receive(message_t* msg, void* payload, uint8_t len) {
     oscilloscope_t *omsg = payload;
 
@@ -88,15 +88,16 @@ implementation
     /* If we receive a newer version, update our interval.
        If we hear from a future count, jump ahead but suppress our own change
     */
-    /*
+
     if (omsg->version > local.version)
       {
 	local.version = omsg->version;
 	local.interval = omsg->interval;
     // restart timer
 	startTimer();
+    // report_problem();
       }
-    */
+
     /*
     if (omsg->count > local.count)
       {
@@ -105,8 +106,8 @@ implementation
 	suppressCountChange = TRUE;
       }
     */
-    //return msg;
-  // }
+    return msg;
+  }
 
   /* At each sample period:
      - if local sample buffer is full, send accumulated samples

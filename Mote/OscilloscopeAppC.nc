@@ -27,7 +27,7 @@ implementation
   OscilloscopeC.Boot -> MainC;
   OscilloscopeC.RadioControl -> ActiveMessageC;
   OscilloscopeC.AMSend -> AMSenderC;
-  // OscilloscopeC.Receive -> AMReceiverC;
+  OscilloscopeC.Receive -> AMReceiverC;
   OscilloscopeC.Timer -> TimerMilliC;
   OscilloscopeC.ReadLight -> LightSensor.Read;
   OscilloscopeC.ReadTemperature->TmpHumSensor.Temperature;
