@@ -71,8 +71,8 @@ module BaseStationP @safe() {
 implementation
 {
   enum {
-    UART_QUEUE_LEN = 12,
-    RADIO_QUEUE_LEN = 12,
+    UART_QUEUE_LEN = 120,
+    RADIO_QUEUE_LEN = 8,
   };
 
   message_t  uartQueueBufs[UART_QUEUE_LEN];
@@ -248,7 +248,7 @@ implementation
     post uartSendTask();
   }
 
-  // 当串口接收到包后会发送给基站
+  // 当串口接收到包后会进行广播
   event message_t *UartReceive.receive[am_id_t id](message_t *msg,
 						   void *payload,
 						   uint8_t len) {

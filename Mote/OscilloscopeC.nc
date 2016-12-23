@@ -91,10 +91,10 @@ implementation
 
     if (omsg->version > local.version)
       {
-	local.version = omsg->version;
-	local.interval = omsg->interval;
+	// local.version = omsg->version;
+	// local.interval = omsg->interval;
     // restart timer
-	startTimer();
+	// startTimer();
     // report_problem();
         report_received();
       }

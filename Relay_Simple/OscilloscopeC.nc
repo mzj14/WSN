@@ -34,7 +34,7 @@ implementation
 {
   message_t sendBuf;   /* for sensor data */
   message_t sendBuf_1; /* for partner message */
-  bool sendBusy;
+  // bool sendBusy;
 
   /* Current local state - interval, version and accumulated readings */
   oscilloscope_t local;
@@ -49,7 +49,7 @@ implementation
   // bool suppressCountChange;
 
   // Use LEDs to report various status issues.
-  void report_problem() { call Leds.led0Toggle(); }
+  void report_problem() { call Leds.led0On(); }
   void report_sent() { call Leds.led1Toggle(); }
   void report_received() { call Leds.led2Toggle(); }
 
@@ -61,7 +61,7 @@ implementation
     local.count = -1;
     local.version = 0;
     local.token = TOKEN_SECRET_RELAY;
-    sendBusy = FALSE;
+    // sendBusy = FALSE;
     if (call RadioControl.start() != SUCCESS)
       report_problem();
   }
@@ -92,10 +92,10 @@ implementation
 
     if (omsg->version > local.version)
       {
-	local.version = omsg->version;
-	local.interval = omsg->interval;
+	// local.version = omsg->version;
+	// local.interval = omsg->interval;
     // restart timer
-	startTimer();
+	// startTimer();
     // report_problem();
         report_received();
         return msg;
@@ -106,18 +106,21 @@ implementation
     }
 
     // send packet to basestation for our partner
-	if (!sendBusy)
-	  {
+	// if (!sendBusy)
+	  // {
 	    // Don't need to check for null because we've already checked length
 	    // above
         // 将 local 信息转存到发送信息中
         omsg->token = TOKEN_SECRET_RELAY;
 	    memcpy(call AMSend.getPayload(&sendBuf_1, sizeof(oscilloscope_t)), omsg, sizeof local);
-	    if (call AMSend.send(AM_BROADCAST_ADDR, &sendBuf_1, sizeof(oscilloscope_t)) == SUCCESS)
-	      sendBusy = TRUE;
-	  }
-	if (!sendBusy)
-	  report_problem();
+	    // if (call AMSend.send(AM_BROADCAST_ADDR, &sendBuf_1, sizeof(oscilloscope_t)) == SUCCESS)
+	      // sendBusy = TRUE;
+        call AMSend.send(AM_BROADCAST_ADDR, &sendBuf_1, sizeof(oscilloscope_t));
+	  // }
+	// if (!sendBusy) {
+        // report_problem();
+    // }
+
 
     return msg;
   }
@@ -130,18 +133,20 @@ implementation
     if (reading == NREADINGS)
       {
     // 如果说这个时候已经集齐了一定数量的传感数据
-	if (!sendBusy && sizeof local <= call AMSend.maxPayloadLength())
-	  {
+	// if (!sendBusy && sizeof local <= call AMSend.maxPayloadLength())
+	  // {
 	    // Don't need to check for null because we've already checked length
 	    // above
         // 将 local 信息转存到发送信息中
 	    memcpy(call AMSend.getPayload(&sendBuf, sizeof(local)), &local, sizeof local);
-	    if (call AMSend.send(AM_BROADCAST_ADDR, &sendBuf, sizeof local) == SUCCESS)
-	      sendBusy = TRUE;
-	  }
+	    // if (call AMSend.send(AM_BROADCAST_ADDR, &sendBuf, sizeof local) == SUCCESS)
+	      // sendBusy = TRUE;
+        call AMSend.send(AM_BROADCAST_ADDR, &sendBuf, sizeof local);
+	  // }
+    /*
 	if (!sendBusy)
 	  report_problem();
-
+    */
 	reading = 0;
 	/* Part 2 of cheap "time sync": increment our count if we didn't
 	   jump ahead. */
@@ -170,7 +175,7 @@ implementation
     else
       report_problem();
 
-    sendBusy = FALSE;
+    // sendBusy = FALSE;
   }
 
   event void ReadTemperature.readDone(error_t result, uint16_t data) {

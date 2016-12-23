@@ -5,6 +5,6 @@
  */
 
 public class Constants  {
-    public static final short DEFAULT_INTERVAL = 256;
     public static final byte NREADINGS = 1;
+    public static final byte DEFAULT_INTERVAL = 50;
 }
