@@ -98,6 +98,8 @@ implementation
     call Leds.led2Toggle();
   }
 
+  void report_received() { call Leds.led0Toggle(); }
+
   event void Boot.booted() {
     uint8_t i;
 
@@ -155,13 +157,15 @@ implementation
     
     // oscilloscope_t* test;
 
-    if (len != sizeof(oscilloscope_t) || ((oscilloscope_t*)payload)->token != TOKEN_SECRET) {
+    // report_received();
+    if (len != sizeof(oscilloscope_t) || ((oscilloscope_t*)payload)->token != TOKEN_SECRET_RELAY) {
         return msg;
     }
 
     // test =     
 
     // 原子操作，不可被打断
+    report_received();
     atomic {
       if (!uartFull)
 	{
@@ -250,6 +254,8 @@ implementation
 						   uint8_t len) {
     message_t *ret = msg;
     bool reflectToken = FALSE;
+ 
+    report_received();
 
     atomic
       if (!radioFull)
@@ -303,7 +309,7 @@ implementation
     call RadioAMPacket.setSource(msg, source);
 
     if (call RadioSend.send[id](addr, msg, len) == SUCCESS)
-      call Leds.led0Toggle();
+      call Leds.led1Toggle();
     else
       {
 	failBlink();
