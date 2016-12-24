@@ -30,5 +30,9 @@ typedef nx_struct answer {
 }
 answer_t;
 
+typedef nx_struct request {
+    nx_uint16_t index;
+}
+request_t;
 
 #endif

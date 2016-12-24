@@ -48,12 +48,15 @@ module BlinkToRadioC {
     uses interface AMSend;
     uses interface Receive;
     uses interface SplitControl as AMControl;
+    uses interface Timer<TMilli> as Timer0;
 }
 implementation {
     uint8_t m_flag[ARRAY_SIZE / 8 + 1] = {};
     uint32_t m_data[ARRAY_SIZE] = {};
     answer_t m_ans;
     uint16_t m_len = 0;
+    uint16_t m_cont = 0; // continuous
+    request_t m_req;
 
     bool check_bit(int offset) {
         return (*(m_flag + offset / 8) & (1 << (7 - offset % 8))) != 0;
@@ -64,17 +67,17 @@ implementation {
     void clear_bit(int offset) {
         *(m_flag + offset / 8) &= ~(1 << (7 - offset % 8));
     }
-    bool received_everything() { return m_len == ARRAY_SIZE; }
+    bool received_everything() {
+        return m_len == ARRAY_SIZE && m_cont == m_len;
+    }
     void commit_source(source_t src) {
         uint16_t i;
         if (src.sequence_number % 100 == 0) {
-
             printf("SEQ %d: %ld\r\n", src.sequence_number, src.random_integer);
             printfflush();
         }
         if (check_bit(src.sequence_number))
             return;
-
         for (i = 0; i < m_len; i++)
             if (*(m_data + i) > src.random_integer)
                 break;
@@ -82,16 +85,11 @@ implementation {
         m_len += 1;
         *(m_data + i) = src.random_integer;
         set_bit(src.sequence_number);
-        /*
-        if (m_len == ARRAY_SIZE)
-                post sort_task();
-         */
     }
     void gen_response() {
         uint16_t i = 0;
         if (m_len != ARRAY_SIZE)
             return;
-
         m_ans.sum = 0;
         for (; i < m_len; ++i)
             m_ans.sum += m_data[i];
@@ -101,11 +99,19 @@ implementation {
         m_ans.median = (m_data[m_len / 2] + m_data[m_len / 2 - 1]) / 2;
         m_ans.group_id = GROUP_ID;
     }
+    void update_max_continuous() {
+        for (; m_cont != m_len; ++m_cont)
+            if (!check_bit(m_cont))
+                break;
+    }
 
     bool answer_acked = FALSE;
     bool busy = FALSE;
 
-    event void Boot.booted() { call AMControl.start(); }
+    event void Boot.booted() {
+        call AMControl.start();
+        call Timer0.startPeriodic(20);
+    }
 
     event void AMControl.startDone(error_t err) {
         if (err == SUCCESS) {
@@ -117,8 +123,19 @@ implementation {
     event void AMControl.stopDone(error_t err) {}
 
     event void AMSend.sendDone(message_t * msg, error_t err) {
-        if (&m_ans == msg) {
+        if (&m_ans == msg || &m_req == msg) {
             busy = FALSE;
+        }
+    }
+
+    event void Timer0.fired() {
+        update_max_continuous();
+        if (m_cont != m_len && !busy) {
+            m_req.index = m_cont;
+            if (call AMSend.send(AM_BROADCAST_ADDR, &m_req,
+                                 sizeof(request_t)) == SUCCESS) {
+                busy = TRUE;
+            }
         }
     }
 
@@ -135,7 +152,7 @@ implementation {
         if (len == sizeof(source_t)) {
             source_t *pkt_source = (source_t *)payload;
             commit_source(*pkt_source);
-
+            update_max_continuous();
             if (answer_acked == FALSE && received_everything()) {
                 if (!busy) {
                     answer_acked = TRUE;
