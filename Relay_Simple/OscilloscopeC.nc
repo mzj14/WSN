@@ -42,9 +42,6 @@ implementation
   task void radioSendTask();
 
   task void radioSendTask() {
-    uint8_t len;
-    am_id_t id;
-    am_addr_t addr,source;
     message_t* msg;
 
     atomic {
