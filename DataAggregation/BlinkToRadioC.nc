@@ -129,6 +129,10 @@ implementation {
     }
 
     event void Timer0.fired() {
+        if (received_everything()) {
+            call Timer0.stop();
+            return;
+        }
         update_max_continuous();
         if (m_cont != m_len && !busy) {
             m_req.index = m_cont;
