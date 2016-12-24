@@ -162,7 +162,7 @@ call Leds.led0Toggle();
             source_t *pkt_source = (source_t *)payload;
             commit_source(*pkt_source);
             update_max_continuous();
-	    printf("%d-", m_cont);
+            printf("[A] Received seq(%d) int(%d).", pkt_source->sequence_number, pkt_source->random_integer);
             if (answer_acked == FALSE && received_everything()) {
 		    call Leds.led2Toggle();
                 if (!busy) {
