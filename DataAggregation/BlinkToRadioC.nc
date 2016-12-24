@@ -69,8 +69,11 @@ implementation {
   }
   void commit_source(source_t src) {
       uint16_t i;
-if(src.sequence_number % 100 == 0) printf("SEQ %d: %ld\r\n", src.sequence_number, src.random_integer);
-printfflush();
+	if(src.sequence_number % 100 == 0) {
+
+		printf("SEQ %d: %ld\r\n", src.sequence_number, src.random_integer);
+		printfflush();
+	}
       if (check_bit(src.sequence_number))
           return;
 
@@ -126,7 +129,15 @@ printfflush();
     }
   }
 
-  event message_t* Receive.receive(message_t* msg, void* payload, uint8_t len){\
+void dump_package(void* pkt, uint8_t len){
+	uint8_t i;
+	unsigned char* c = (unsigned char*) pkt;
+	for(i=0; i<len; i++){
+		printf("%02x ", c[i]);
+	}
+	printf("\r\n");
+}
+  event message_t* Receive.receive(message_t* msg, void* payload, uint8_t len){
 if (len == sizeof(source_t)) {
       source_t* pkt_source = (source_t*)payload;
       commit_source(*pkt_source);
@@ -135,7 +146,8 @@ if (len == sizeof(source_t)) {
           if (!busy) {
 answer_acked = TRUE;
             gen_response();
-printf("max=%ld, min=%ld, median=%ld, average=%ld, sum=%ld\n", m_ans.max, m_ans.min, m_ans.median, m_ans.average, m_ans.sum);
+		printf("max=%ld, min=%ld, median=%ld, average=%ld, sum=%ld\n", m_ans.max, m_ans.min, m_ans.median, m_ans.average, m_ans.sum);
+		dump_package((void*)(&m_ans), sizeof(m_ans));
             if (call AMSend.send(AM_BROADCAST_ADDR, &m_ans, sizeof(answer_t)) == SUCCESS) {
               busy = TRUE;
             }
