@@ -124,7 +124,7 @@ implementation {
     event void AMControl.stopDone(error_t err) {}
 
     event void AMSend.sendDone(message_t * msg, error_t err) {
-        if (&m_ans == msg || &m_req == msg) {
+        if (&send_buf == msg || &req_buf == msg) {
             busy = FALSE;
         }
     }
