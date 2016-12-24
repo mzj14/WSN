@@ -77,7 +77,7 @@ printfflush();
       for (i = 0; i < m_len; i++)
           if (*(m_data + i) > src.random_integer)
               break;
-      memmove(m_data + i + 1, m_data + i, (m_len - i) * sizeof(int));
+      memmove(m_data + i + 1, m_data + i, (m_len - i) * sizeof(uint32_t));
       m_len += 1;
       *(m_data + i) = src.random_integer;
       set_bit(src.sequence_number);
@@ -92,7 +92,7 @@ printfflush();
           return;
 
       m_ans.sum = 0;
-      for (; i < (m_len - 1); ++i)
+      for (; i < m_len; ++i)
           m_ans.sum += m_data[i];
       m_ans.average = m_ans.sum / m_len;
       m_ans.min = m_data[0];
@@ -133,12 +133,14 @@ if (len == sizeof(source_t)) {
 
       if(answer_acked == FALSE && received_everything()){
           if (!busy) {
+answer_acked = TRUE;
             gen_response();
 printf("max=%ld, min=%ld, median=%ld, average=%ld, sum=%ld\n", m_ans.max, m_ans.min, m_ans.median, m_ans.average, m_ans.sum);
             if (call AMSend.send(AM_BROADCAST_ADDR, &m_ans, sizeof(answer_t)) == SUCCESS) {
               busy = TRUE;
             }
           }
+
       }
     } else if (len == sizeof(ack_t)) {
         ack_t* pkt_ack = (ack_t*)payload;
