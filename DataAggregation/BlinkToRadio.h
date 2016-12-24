@@ -5,7 +5,7 @@
 
 enum {
     ARRAY_SIZE = 2000,
-    GROUP_ID = 31,
+    GROUP_ID = 6,
     AM_BLINKTORADIO = 0
 };
 
@@ -27,7 +27,6 @@ typedef nx_struct answer {
     nx_uint32_t sum;
     nx_uint32_t average;
     nx_uint32_t median;
-    nx_uint32_t token;
 }
 answer_t;
 
