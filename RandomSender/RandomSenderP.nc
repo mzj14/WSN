@@ -1,5 +1,4 @@
-
-#include "./../Calculate/Calculate.h"
+#include "header.h"
 
 module RandomSenderP
 {
