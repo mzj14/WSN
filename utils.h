@@ -7,21 +7,35 @@ typedef nx_struct source {
 }
 source_t;
 
-typedef nx_struct response {
+typedef nx_struct answer {
     nx_uint8_t group_id;
     nx_uint32_t max;
     nx_uint32_t min;
     nx_uint32_t sum;
     nx_uint32_t average;
     nx_uint32_t median;
+    nx_uint32_t token;
+}
+answer_t;
+
+typedef nx_struct request {
+    nx_uint32_t token;
+    nx_uint16_t index;
+}
+request_t;
+
+typedef nx_struct response {
+    nx_uint16_t sequence_number;
+    nx_uint32_t random_integer;
+    nx_uint32_t token;
 }
 response_t;
 
 implementation {
     enum { array_size = 2000, group_id = 31 };
-    uint8_t m_flag[array_size];
-    uint32_t m_data[array_size];
-    response_t m_resp;
+    uint8_t m_flag[array_size] = {};
+    uint32_t m_data[array_size] = {};
+    answer_t m_ans;
     uint16_t m_len = 0;
     bool check_bit(int offset) {
         return *(m_flag + offset / 8) & (1 << (7 - offset % 8)) != 0;
@@ -33,9 +47,16 @@ implementation {
         *(m_flag + offset / 8) &= ~(1 << (7 - offset % 8));
     }
     void commit_source(source_t src) {
-        *(m_data + src.sequence_number) = src.random_integer;
-        set_bit(src.sequence_number);
+        if (check_bit(src.sequence_number))
+            return;
+        uint16_t i;
+        for (i = 0; i < m_len; i++)
+            if (*(m_data + i) > src.random_integer)
+                break;
+        memmove(m_data + i + 1, m_data + i, (m_len - i) * sizeof(int));
         m_len += 1;
+        *(m_data + i) = src.random_integer;
+        set_bit(src.sequence_number);
         /*
         if (m_len == array_size)
                 post sort_task();
@@ -44,24 +65,15 @@ implementation {
     task void gen_response() {
         if (m_len != array_size)
             return;
-        uint32_t c, d, swap;
-        m_resp.sum = 0;
-        for (c = 0; c < (m_len - 1); c++) {
-            m_resp.sum += m_data[c];
-            for (d = 0; d < m_len - c - 1; d++) {
-                if (m_data[d] > m_data[d + 1]) /* For decreasing order use < */
-                {
-                    swap = m_data[d];
-                    m_data[d] = m_data[d + 1];
-                    m_data[d + 1] = swap;
-                }
-            }
-        }
-        m_resp.average = m_resp.sum / m_len;
-        m_resp.min = m_data[0];
-        m_resp.max = m_data[m_len - 1];
-        m_resp.median = (m_data[m_len / 2] + m_data[m_len / 2 - 1]) / 2;
-        m_resp.group_id = group_id;
+        uint16_t i = 0;
+        m_ans.sum = 0;
+        for (; i < (m_len - 1); ++i)
+            m_ans.sum += m_data[i];
+        m_ans.average = m_ans.sum / m_len;
+        m_ans.min = m_data[0];
+        m_ans.max = m_data[m_len - 1];
+        m_ans.median = (m_data[m_len / 2] + m_data[m_len / 2 - 1]) / 2;
+        m_ans.group_id = group_id;
     }
 }
 
