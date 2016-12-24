@@ -77,7 +77,7 @@ implementation {
             printf("SEQ %d: %ld\r\n", src.sequence_number, src.random_integer);
             printfflush();
         }
-        if (check_bit(src.sequence_number))
+        if (check_bit(src.sequence_number - 1))
             return;
         for (i = 0; i < m_len; i++)
             if (*(m_data + i) > src.random_integer)
@@ -85,7 +85,7 @@ implementation {
         memmove(m_data + i + 1, m_data + i, (m_len - i) * sizeof(uint32_t));
         m_len += 1;
         *(m_data + i) = src.random_integer;
-        set_bit(src.sequence_number);
+        set_bit(src.sequence_number - 1);
     }
     void gen_response() {
         uint16_t i = 0;
