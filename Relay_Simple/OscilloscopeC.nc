@@ -118,12 +118,11 @@ implementation
 
     // Now we know that the message is from our partner
     omsg->token = TOKEN_SECRET_RELAY;
-
+    report_received();
     // we need to send the message to basestation for out partner
     // 原子操作，不可被打断
     atomic {
       if (!radioFull) {
-        call Leds.led0Toggle();
         ret = radioQueue[radioIn];
         radioQueue[radioIn] = msg;
         // radioIn 指向下一个包的位置

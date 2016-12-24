@@ -14,16 +14,7 @@
 #define OSCILLOSCOPE_H
 
 enum {
-  /* Number of readings per message. If you increase this, you may have to
-     increase the message_t size. */
-  NREADINGS = 1,
-
-  /* Default sampling period. */
-  DEFAULT_INTERVAL = 50,
-
   AM_OSCILLOSCOPE = 0x93,
-
-  TOKEN_SECRET = 0xd7b5c6a0
 };
 
 typedef nx_struct oscilloscope {

@@ -46,14 +46,15 @@ implementation
   task void radioSendTask();
 
   void dropBlink() {
-    call Leds.led2Toggle();
+    call Leds.led0Toggle();
   }
 
   void failBlink() {
-    call Leds.led2Toggle();
+    call Leds.led0Toggle();
   }
 
-  void report_received() { call Leds.led0Toggle(); }
+  void report_received() { call Leds.led2Toggle(); }
+  void report_sent() { call Leds.led1Toggle(); }
 
   event void Boot.booted() {
     uint8_t i;
@@ -172,7 +173,7 @@ implementation
     call UartAMPacket.setSource(msg, src);
 
     if (call UartSend.send[id](addr, uartQueue[uartOut], len) == SUCCESS)
-      call Leds.led1Toggle();
+      report_sent();
     else
       {
     // 发送失败后会重新发送
@@ -263,7 +264,7 @@ implementation
     call RadioAMPacket.setSource(msg, source);
 
     if (call RadioSend.send[id](addr, msg, len) == SUCCESS)
-      call Leds.led1Toggle();
+      report_sent();
     else
       {
   failBlink();
