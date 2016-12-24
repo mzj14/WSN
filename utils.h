@@ -33,18 +33,28 @@ response_t;
 
 implementation {
     enum { array_size = 2000, group_id = 31 };
-    uint8_t m_flag[array_size] = {};
+    uint8_t m_flag[array_size / 8 + 1] = {};
     uint32_t m_data[array_size] = {};
     answer_t m_ans;
     uint16_t m_len = 0;
     bool check_bit(int offset) {
-        return *(m_flag + offset / 8) & (1 << (7 - offset % 8)) != 0;
+        return (*(m_flag + offset / 8) & (1 << (7 - offset % 8))) != 0;
     }
     void set_bit(int offset) {
         *(m_flag + offset / 8) |= (1 << (7 - offset % 8));
     }
     void clear_bit(int offset) {
         *(m_flag + offset / 8) &= ~(1 << (7 - offset % 8));
+    }
+    bool received_everything() {
+        int i = 0;
+        for (; i < array_size / 8; ++i)
+            if (m_flag[i] != (uint8_t)(-1))
+                return FALSE;
+        for (i = array_size / 8 * 8; i < array_size - array_size / 8 * 8; ++i)
+            if (!check_bit(i))
+                return FALSE;
+        return TRUE;
     }
     void commit_source(source_t src) {
         if (check_bit(src.sequence_number))
