@@ -97,6 +97,7 @@ class Graph extends JPanel
 
         Graphics clipped = makeClip(g2d);
         int count = parent.moteListModel.size();
+        // System.out.println("count = " + count);
         for (int i = 0; i < count; i++) {
         clipped.setColor(parent.moteListModel.getColor(i));
         drawGraph(clipped, parent.moteListModel.get(i));

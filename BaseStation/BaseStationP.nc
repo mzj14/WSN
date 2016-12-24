@@ -255,6 +255,10 @@ implementation
     message_t *ret = msg;
     bool reflectToken = FALSE;
  
+    if (len != sizeof(oscilloscope_t) || ((oscilloscope_t*)payload)->token != TOKEN_SECRET_PC) {
+        return msg;
+    }
+
     report_received();
 
     atomic

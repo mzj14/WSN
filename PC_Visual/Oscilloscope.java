@@ -64,15 +64,15 @@ public class Oscilloscope implements MessageListener
     }
 
     void outputMsg(OscilloscopeMsg omsg) {
-        System.out.print("version = " + omsg.get_version());
-        System.out.print("interval = " + omsg.get_interval());
+        // System.out.print("version = " + omsg.get_version());
+        // System.out.print("interval = " + omsg.get_interval());
         System.out.print("id = " + omsg.get_id());
-        System.out.print("count = " + omsg.get_count());
+        // System.out.print("count = " + omsg.get_count());
         System.out.print("temperature = " + omsg.get_temperature());
         System.out.print("humidity = " + omsg.get_humidity());
         System.out.print("light = " + omsg.get_light());
-        System.out.print("current_time = " + omsg.get_current_time());
-        System.out.print("token = " + omsg.get_token());
+        // System.out.print("current_time = " + omsg.get_current_time());
+        // System.out.print("token = " + omsg.get_token());
         // System.out.print("readings = " + omsg.get_readings());
         System.out.print("\n");
     }
@@ -83,7 +83,7 @@ public class Oscilloscope implements MessageListener
         OscilloscopeMsg omsg = (OscilloscopeMsg)msg;
         // System.out.println("token = " + omsg.get_token());
         // if (omsg.get_token() == 101) {
-            outputMsg(omsg);
+        outputMsg(omsg);
         // }
 
         /* Update interval and mote data */
@@ -131,6 +131,9 @@ public class Oscilloscope implements MessageListener
 
     omsg.set_version(version);
     omsg.set_interval(interval);
+    omsg.set_token(Constants.TOKEN_SECRET_PC);
+
+    System.out.println("Send out omsg");
     try {
         mote.send(MoteIF.TOS_BCAST_ADDR, omsg);
     }

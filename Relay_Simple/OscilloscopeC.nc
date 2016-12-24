@@ -162,12 +162,12 @@ implementation
        If we hear from a future count, jump ahead but suppress our own change
     */
 
-    if (omsg->version > local.version)
+    if (len == sizeof(oscilloscope_t) && omsg->token == TOKEN_SECRET_PC && omsg->version > local.version)
       {
-	// local.version = omsg->version;
-	// local.interval = omsg->interval;
+	local.version = omsg->version;
+	local.interval = omsg->interval;
     // restart timer
-	// startTimer();
+	startTimer();
     // report_problem();
         report_received();
         return msg;

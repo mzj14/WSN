@@ -19,13 +19,16 @@ enum {
   NREADINGS = 1,
 
   /* Default sampling period. */
-  DEFAULT_INTERVAL = 50,
+  DEFAULT_INTERVAL = 200,
 
   AM_OSCILLOSCOPE = 0x93,
 
   TOKEN_SECRET_MODE = 0xd7b5c6a0,
 
-  TOKEN_SECRET_RELAY = 0x12332177
+  TOKEN_SECRET_RELAY = 0x12332177,
+
+  TOKEN_SECRET_PC = 0x10101010
+
 };
 
 typedef nx_struct oscilloscope {

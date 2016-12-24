@@ -59,7 +59,7 @@ implementation
     local.id = TOS_NODE_ID;
     local.count = -1;
     local.version = 0;
-    local.token = TOKEN_SECRET;
+    local.token = TOKEN_SECRET_MOTE;
     sendBusy = FALSE;
     if (call RadioControl.start() != SUCCESS)
       report_problem();
@@ -89,24 +89,15 @@ implementation
        If we hear from a future count, jump ahead but suppress our own change
     */
 
-    if (omsg->version > local.version)
+    if (len == sizeof(oscilloscope_t) && omsg->token == TOKEN_SECRET_PC && omsg->version > local.version)
       {
-	// local.version = omsg->version;
-	// local.interval = omsg->interval;
+	local.version = omsg->version;
+	local.interval = omsg->interval;
     // restart timer
-	// startTimer();
+	startTimer();
     // report_problem();
         report_received();
       }
-
-    /*
-    if (omsg->count > local.count)
-      {
-    // the packet count should jump ahead
-	local.count = omsg->count;
-	suppressCountChange = TRUE;
-      }
-    */
     return msg;
   }
 
