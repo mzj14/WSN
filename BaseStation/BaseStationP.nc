@@ -120,8 +120,8 @@ implementation
 
     // 原子操作，不可被打断
     report_received();
-    printf("%d, %ld\n", omsg->id, omsg->token);
-    printfflush();
+    // printf("%d, %ld\n", omsg->id, omsg->token);
+    // printfflush();
     atomic {
       if (!uartFull)
   {

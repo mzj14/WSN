@@ -20,7 +20,7 @@ implementation
 {
   // set packet sequence length
   enum {
-    RADIO_QUEUE_LEN = 64,
+    RADIO_QUEUE_LEN = 120,
   };
 
   message_t  radioQueueBufs[RADIO_QUEUE_LEN];
@@ -33,11 +33,11 @@ implementation
   bool       radioBusy, radioFull;
 
   // Use LEDs to report various status issues.
-  void report_problem() { call Leds.led0Toggle(); }
+  void report_problem() { call Leds.led0Toggle(); printf("can not read data from senser");}
   void report_sent() { call Leds.led1Toggle(); }
   void report_received() { call Leds.led2Toggle(); }
-  void dropBlink() { call Leds.led0Toggle(); }
-  void failBlink() { call Leds.led0Toggle(); }
+  void dropBlink() { call Leds.led0Toggle(); printf("drop packet");}
+  void failBlink() { call Leds.led0Toggle(); printf("fail to send packet");}
 
   // bool sendBusy;
   task void radioSendTask();
@@ -50,6 +50,8 @@ implementation
           radioBusy = FALSE;
           return;
       }
+      printf("radioOut = %d\n", radioOut);
+      printfflush(); 
       msg = radioQueue[radioOut];
       if (call AMSend.send(AM_BROADCAST_ADDR, msg, sizeof(oscilloscope_t)) == SUCCESS) {
         report_sent();
@@ -115,8 +117,8 @@ implementation
 
     if (len != sizeof(oscilloscope_t) || omsg->token != TOKEN_SECRET_MOTE) {
        // report_received();
-       printf("%d, %ld\n", omsg->id, omsg->token);
-       printfflush();
+       // printf("%d, %ld\n", omsg->id, omsg->token);
+       // printfflush();
        return msg;
     }
 

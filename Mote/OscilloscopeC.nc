@@ -27,7 +27,7 @@ implementation
   uint8_t reading; /* 0 to NREADINGS */
 
   // Use LEDs to report various status issues.
-  void report_problem() { call Leds.led0Toggle(); }
+  void report_problem() { call Leds.led0Toggle(); printf("can not read data from senser");}
   void report_sent() { call Leds.led1Toggle(); }
   void report_received() { call Leds.led2Toggle(); }
 
