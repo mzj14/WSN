@@ -135,9 +135,10 @@ implementation {
             return;
         }
         update_max_continuous();
+        printf("[A] Fired: m_cont(%d) m_len(%d) busy(%d).\n", m_cont, m_len, busy);
         if (m_cont != m_len && !busy) {
             m_req.index = m_cont + 1;
-            printf("[A] Trying to get %d seq.", m_req.index);
+            printf("[A] Trying to get %d seq.\n", m_req.index);
             printfflush();
             memcpy(call AMSend.getPayload(&req_buf, sizeof(m_req)), &m_req, sizeof(m_req));
             if (call AMSend.send(AM_BROADCAST_ADDR, &req_buf,
