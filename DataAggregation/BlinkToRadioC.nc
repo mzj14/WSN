@@ -136,7 +136,9 @@ implementation {
         }
         update_max_continuous();
         if (m_cont != m_len && !busy) {
-            m_req.index = m_cont;
+            m_req.index = m_cont + 1;
+            printf("[A] Trying to get %d seq.", m_req.index);
+            printfflush();
             memcpy(call AMSend.getPayload(&req_buf, sizeof(m_req)), &m_req, sizeof(m_req));
             if (call AMSend.send(AM_BROADCAST_ADDR, &req_buf,
                                  sizeof(request_t)) == SUCCESS) {
