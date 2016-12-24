@@ -58,7 +58,7 @@ implementation {
     uint16_t m_cont = 0; // continuous
     request_t m_req;
     message_t send_buf;
-
+    message_t req_buf;
     bool check_bit(int offset) {
         return (*(m_flag + offset / 8) & (1 << (7 - offset % 8))) != 0;
     }
@@ -137,7 +137,8 @@ implementation {
         update_max_continuous();
         if (m_cont != m_len && !busy) {
             m_req.index = m_cont;
-            if (call AMSend.send(AM_BROADCAST_ADDR, &m_req,
+            memcpy(call AMSend.getPayload(&req_buf, sizeof(m_req)), &m_req, sizeof(m_req));
+            if (call AMSend.send(AM_BROADCAST_ADDR, &req_buf,
                                  sizeof(request_t)) == SUCCESS) {
                 busy = TRUE;
             }
