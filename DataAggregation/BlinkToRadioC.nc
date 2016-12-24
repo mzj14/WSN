@@ -69,7 +69,7 @@ implementation {
         *(m_flag + offset / 8) &= ~(1 << (7 - offset % 8));
     }
     bool received_everything() {
-        return m_len == ARRAY_SIZE && m_cont == m_len;
+        return m_len == ARRAY_SIZE ; // && m_cont == m_len;
     }
     void commit_source(source_t src) {
         uint16_t i;
@@ -154,11 +154,14 @@ implementation {
     }
     event message_t *Receive.receive(message_t * msg, void *payload,
                                      uint8_t len) {
+call Leds.led0Toggle();
         if (len == sizeof(source_t)) {
             source_t *pkt_source = (source_t *)payload;
             commit_source(*pkt_source);
             update_max_continuous();
+	    printf("%d-", m_cont);
             if (answer_acked == FALSE && received_everything()) {
+		    call Leds.led2Toggle();
                 if (!busy) {
                     //answer_acked = TRUE;
                     gen_response();
@@ -182,6 +185,7 @@ implementation {
             if (pkt_ack->group_id == GROUP_ID) {
 		    printf("ACK \n");
                 answer_acked = TRUE;
+call 		Leds.led1Toggle();
             }
         }
         return msg;

@@ -49,7 +49,7 @@ implementation {
   components new AMSenderC(AM_BLINKTORADIO);
   components new AMReceiverC(AM_BLINKTORADIO);
   components PrintfC;
-  // components SerialStartC;
+  components SerialStartC;
   components new TimerMilliC() as Timer0;
 
   App.Boot -> MainC;

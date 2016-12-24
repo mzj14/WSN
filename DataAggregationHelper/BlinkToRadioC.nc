@@ -79,6 +79,7 @@ implementation {
     }
     event message_t *Receive.receive(message_t * msg, void *payload,
                                      uint8_t len) {
+	source_t* resp;
         if (len == sizeof(source_t)) {
             source_t *pkt_source = (source_t *)payload;
             commit_source(*pkt_source);
@@ -87,9 +88,11 @@ implementation {
 
             if (pkt_request->token == TOKEN) {
 		    uint16_t seq = pkt_request->index;
-
+		    printf("#%d", seq);
+		    printfflush();
 		    if (check_bit(seq)){
-			    response_t* resp = (response_t*)(call Packet.getPayload(&resppkt, sizeof(response_t)));
+			    printf(", HIT\n");
+			    resp = (source_t*)(call Packet.getPayload(&resppkt, sizeof(source_t)));
 			    resp->token = TOKEN;
 			    resp->random_integer = m_data[seq];
 			    resp->sequence_number = seq;
@@ -97,7 +100,12 @@ implementation {
 			    if (call AMSend.send(AM_BROADCAST_ADDR, &resppkt, sizeof(response_t)) == SUCCESS) {
 				    busy = TRUE;
 			    }
+		    }else{
+			    printf(", MISS=====\n");
+		    
 		    }
+
+		    printfflush();
             }
         }
         return msg;

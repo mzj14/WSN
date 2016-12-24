@@ -101,7 +101,7 @@ implementation {
   }
 
   event message_t* Receive.receive(message_t* msg, void* payload, uint8_t len){
-    if (len == sizeof(answer_t)) {
+printf("r");    if (len == sizeof(answer_t)) {
       answer_t* pkt_source = (answer_t*)payload;
       report_received();
 
