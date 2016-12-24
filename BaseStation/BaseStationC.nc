@@ -3,6 +3,8 @@ configuration BaseStationC {
 implementation {
   components MainC, BaseStationP, LedsC;
   components ActiveMessageC as Radio, SerialActiveMessageC as Serial;
+  components PrintfC;
+  components SerialStartC;
 
   MainC.Boot <- BaseStationP;
 

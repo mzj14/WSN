@@ -1,6 +1,7 @@
 #include "AM.h"
 #include "Serial.h"
 #include "Oscilloscope.h"
+#include "printf.h"
 
 module BaseStationP @safe() {
   uses {
@@ -110,7 +111,8 @@ implementation
   // 当基站的 radio 接收到包后会发送给串口
   message_t* receive(message_t *msg, void *payload, uint8_t len) {
     message_t *ret = msg;
-
+    oscilloscope_t* omsg = (oscilloscope_t*)payload;
+    
     // report_received();
     if (len != sizeof(oscilloscope_t) || ((oscilloscope_t*)payload)->token != TOKEN_SECRET_RELAY) {
         return msg;
@@ -118,6 +120,8 @@ implementation
 
     // 原子操作，不可被打断
     report_received();
+    printf("%d, %ld\n", omsg->id, omsg->token);
+    printfflush();
     atomic {
       if (!uartFull)
   {

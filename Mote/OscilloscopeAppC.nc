@@ -5,6 +5,8 @@ implementation
     new TimerMilliC(), new AMSenderC(AM_OSCILLOSCOPE), new AMReceiverC(AM_OSCILLOSCOPE);
   components new HamamatsuS1087ParC() as LightSensor;
   components new SensirionSht11C() as TmpHumSensor;
+  components PrintfC;
+  components SerialStartC;
 
   OscilloscopeC.Boot -> MainC;
   OscilloscopeC.RadioControl -> ActiveMessageC;

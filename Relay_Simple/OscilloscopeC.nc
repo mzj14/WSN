@@ -1,4 +1,5 @@
 #include "Timer.h"
+#include "printf.h"
 #include "Oscilloscope.h"
 
 module OscilloscopeC @safe()
@@ -113,6 +114,9 @@ implementation
     }
 
     if (len != sizeof(oscilloscope_t) || omsg->token != TOKEN_SECRET_MOTE) {
+       // report_received();
+       printf("%d, %ld\n", omsg->id, omsg->token);
+       printfflush();
        return msg;
     }
 

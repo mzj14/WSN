@@ -1,3 +1,4 @@
 COMPONENT=OscilloscopeAppC
 CFLAGS += -DCC2420_DEF_RFPOWER=30
+CFLAGS += -I$(TOSDIR)/lib/printf
 include $(MAKERULES)
