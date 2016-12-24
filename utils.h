@@ -24,7 +24,7 @@ implementation {
     response_t m_resp;
     uint16_t m_len = 0;
     bool check_bit(int offset) {
-        return *(m_flag + offset / 8) & (1 << (7 - offset % 8));
+        return *(m_flag + offset / 8) & (1 << (7 - offset % 8)) != 0;
     }
     void set_bit(int offset) {
         *(m_flag + offset / 8) |= (1 << (7 - offset % 8));
@@ -42,6 +42,8 @@ implementation {
          */
     }
     task void gen_response() {
+        if (m_len != array_size)
+            return;
         uint32_t c, d, swap;
         m_resp.sum = 0;
         for (c = 0; c < (m_len - 1); c++) {
@@ -58,7 +60,7 @@ implementation {
         m_resp.average = m_resp.sum / m_len;
         m_resp.min = m_data[0];
         m_resp.max = m_data[m_len - 1];
-        m_resp.median = m_data[m_len / 2];
+        m_resp.median = (m_data[m_len / 2] + m_data[m_len / 2 - 1]) / 2;
         m_resp.group_id = group_id;
     }
 }
