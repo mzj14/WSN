@@ -159,7 +159,7 @@ implementation {
             update_max_continuous();
             if (answer_acked == FALSE && received_everything()) {
                 if (!busy) {
-                    answer_acked = TRUE;
+                    //answer_acked = TRUE;
                     gen_response();
                     printf(
                         "max=%ld, min=%ld, median=%ld, average=%ld, sum=%ld\n",
@@ -174,7 +174,9 @@ implementation {
             }
         } else if (len == sizeof(ack_t)) {
             ack_t *pkt_ack = (ack_t *)payload;
+	    printf("ACK, \n");
             if (pkt_ack->group_id == GROUP_ID) {
+		    printf("ACK \n");
                 answer_acked = TRUE;
             }
         }
