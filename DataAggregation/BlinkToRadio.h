@@ -5,7 +5,8 @@
 
 enum {
     ARRAY_SIZE = 2000,
-    GROUP_ID = 31
+    GROUP_ID = 31,
+    AM_BLINKTORADIO = 0
 };
 
 typedef nx_struct ack {

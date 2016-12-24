@@ -38,6 +38,7 @@
  */
 #include <Timer.h>
 #include "BlinkToRadio.h"
+#include "printf.h"
 
 module BlinkToRadioC {
   uses interface Boot;
@@ -49,59 +50,6 @@ module BlinkToRadioC {
   uses interface SplitControl as AMControl;
 }
 implementation {
-
-  bool answer_acked = FALSE;
-  bool busy = FALSE;
-
-  event void Boot.booted() {
-    call AMControl.start();
-  }
-
-  event void AMControl.startDone(error_t err) {
-    if (err == SUCCESS) {
-    }
-    else {
-      call AMControl.start();
-    }
-  }
-
-  event void AMControl.stopDone(error_t err) {
-  }
-
-
-  event void AMSend.sendDone(answer_t* msg, error_t err) {
-    if (&pkt == msg) {
-      busy = FALSE;
-    }
-  }
-
-  event answer_t* Receive.receive(answer_t* msg, void* payload, uint8_t len){
-    if (len == sizeof(source_t)) {
-      source_t* pkt_source = (source_t*)payload;
-      commit_source(*pkt_source);
-
-      if(answer_acked == FALSE && received_everything()){
-          if (!busy) {
-            gen_response();
-            if (call AMSend.send(AM_BROADCAST_ADDR, &m_ans, sizeof(answer_t)) == SUCCESS) {
-              busy = TRUE;
-            }
-          }
-      }
-    } else if (len == sizeof(ack_t)) {
-        ack_t* pkt_ack = (ack_t*)payload;
-        if(pkt_ack->GROUP_ID == GROUP_ID){
-            answer_acked = TRUE;
-        }
-    }
-    return msg;
-  }
-
-
-
-
-
-
   uint8_t m_flag[ARRAY_SIZE / 8 + 1] = {};
   uint32_t m_data[ARRAY_SIZE] = {};
   answer_t m_ans;
@@ -120,9 +68,12 @@ implementation {
       return m_len == ARRAY_SIZE;
   }
   void commit_source(source_t src) {
+      uint16_t i;
+if(src.sequence_number % 100 == 0) printf("SEQ %d: %ld\r\n", src.sequence_number, src.random_integer);
+printfflush();
       if (check_bit(src.sequence_number))
           return;
-      uint16_t i;
+
       for (i = 0; i < m_len; i++)
           if (*(m_data + i) > src.random_integer)
               break;
@@ -135,10 +86,11 @@ implementation {
               post sort_task();
        */
   }
-  task void gen_response() {
+  void gen_response() {
+      uint16_t i = 0;
       if (m_len != ARRAY_SIZE)
           return;
-      uint16_t i = 0;
+
       m_ans.sum = 0;
       for (; i < (m_len - 1); ++i)
           m_ans.sum += m_data[i];
@@ -146,7 +98,60 @@ implementation {
       m_ans.min = m_data[0];
       m_ans.max = m_data[m_len - 1];
       m_ans.median = (m_data[m_len / 2] + m_data[m_len / 2 - 1]) / 2;
-      m_ans.GROUP_ID = GROUP_ID;
+      m_ans.group_id = GROUP_ID;
   }
+
+  bool answer_acked = FALSE;
+  bool busy = FALSE;
+
+  event void Boot.booted() {    
+	call AMControl.start();
+  }
+
+  event void AMControl.startDone(error_t err) {
+    if (err == SUCCESS) {
+    }
+    else {
+      call AMControl.start();
+    }
+  }
+
+  event void AMControl.stopDone(error_t err) {
+  }
+
+
+  event void AMSend.sendDone(message_t* msg, error_t err) {
+    if (&m_ans == msg) {
+      busy = FALSE;
+    }
+  }
+
+  event message_t* Receive.receive(message_t* msg, void* payload, uint8_t len){\
+if (len == sizeof(source_t)) {
+      source_t* pkt_source = (source_t*)payload;
+      commit_source(*pkt_source);
+
+      if(answer_acked == FALSE && received_everything()){
+          if (!busy) {
+            gen_response();
+printf("max=%ld, min=%ld, median=%ld, average=%ld, sum=%ld\n", m_ans.max, m_ans.min, m_ans.median, m_ans.average, m_ans.sum);
+            if (call AMSend.send(AM_BROADCAST_ADDR, &m_ans, sizeof(answer_t)) == SUCCESS) {
+              busy = TRUE;
+            }
+          }
+      }
+    } else if (len == sizeof(ack_t)) {
+        ack_t* pkt_ack = (ack_t*)payload;
+        if(pkt_ack->group_id == GROUP_ID){
+            answer_acked = TRUE;
+        }
+    }
+    return msg;
+  }
+
+
+
+
+
 
 }

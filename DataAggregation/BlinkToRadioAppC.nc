@@ -48,6 +48,8 @@ implementation {
   components ActiveMessageC;
   components new AMSenderC(AM_BLINKTORADIO);
   components new AMReceiverC(AM_BLINKTORADIO);
+  components PrintfC;
+  components SerialStartC;
 
   App.Boot -> MainC;
   App.Leds -> LedsC;
