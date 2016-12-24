@@ -59,4 +59,5 @@ implementation {
   App.AMControl -> ActiveMessageC;
   App.AMSend -> AMSenderC;
   App.Receive -> AMReceiverC;
+  App.Timer0 -> Timer0;
 }
