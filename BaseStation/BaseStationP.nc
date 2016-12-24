@@ -48,10 +48,12 @@ implementation
 
   void dropBlink() {
     call Leds.led0Toggle();
+    printf("drop packet");
   }
 
   void failBlink() {
     call Leds.led0Toggle();
+    printf("fail to send packet");
   }
 
   void report_received() { call Leds.led2Toggle(); }
