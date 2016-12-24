@@ -1,6 +1,11 @@
 #ifndef __util__HeaderFile__
 #define __util__HeaderFile__
 
+typedef nx_struct ack {
+    nx_uint8_t group_id;
+}
+ack_t;
+
 typedef nx_struct source {
     nx_uint16_t sequence_number;
     nx_uint32_t random_integer;
