@@ -57,6 +57,7 @@ implementation {
     uint16_t m_len = 0;
     uint16_t m_cont = 0; // continuous
     request_t m_req;
+    message_t send_buf;
 
     bool check_bit(int offset) {
         return (*(m_flag + offset / 8) & (1 << (7 - offset % 8))) != 0;
@@ -165,8 +166,11 @@ implementation {
                         "max=%ld, min=%ld, median=%ld, average=%ld, sum=%ld\n",
                         m_ans.max, m_ans.min, m_ans.median, m_ans.average,
                         m_ans.sum);
+
+                    memcpy(call AMSend.getPayload(&send_buf, sizeof(m_ans)), &m_ans, sizeof m_ans);
+
                     dump_package((void *)(&m_ans), sizeof(m_ans));
-                    if (call AMSend.send(AM_BROADCAST_ADDR, &m_ans,
+                    if (call AMSend.send(AM_BROADCAST_ADDR, &send_buf,
                                          sizeof(answer_t)) == SUCCESS) {
                         busy = TRUE;
                     }
