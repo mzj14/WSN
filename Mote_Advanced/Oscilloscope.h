@@ -25,7 +25,7 @@ typedef nx_struct oscilloscope {
   nx_uint16_t humidity;
   nx_uint16_t light;
   nx_uint32_t current_time;
-  nx_uint32_t token; /* token for packet identification */
+  nx_uint32_t token;
 } oscilloscope_t;
 
 #endif

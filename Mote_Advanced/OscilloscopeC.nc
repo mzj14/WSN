@@ -18,53 +18,99 @@ module OscilloscopeC @safe()
 }
 implementation
 {
-  message_t sendBuf;
-  bool sendBusy;
+  // set packet sequence length
+  enum {
+    RADIO_QUEUE_LEN = 120,
+  };
+
+  message_t  radioQueueBufs[RADIO_QUEUE_LEN];
+  message_t  * ONE_NOK radioQueue[RADIO_QUEUE_LEN];
+
+  message_t sendBuf;   /* for sensor data */
+  message_t sendBuf_1; /* for partner packet */
+
+  uint8_t    radioIn, radioOut;
+  bool       radioBusy, radioFull;
+
+  // Use LEDs to report various status issues.
+  void report_problem() { call Leds.led0Toggle(); printf("can not read data from senser");}
+  void report_sent() { call Leds.led1Toggle(); }
+  void report_received() { call Leds.led2Toggle(); }
+  void dropBlink() { call Leds.led0Toggle(); printf("drop packet");}
+  void failBlink() { call Leds.led0Toggle(); printf("fail to send packet");}
+
+  // bool sendBusy;
+  task void radioSendTask();
+
+  task void radioSendTask() {
+    message_t* msg;
+
+    atomic {
+      if (radioIn == radioOut && !radioFull) {
+          radioBusy = FALSE;
+          return;
+      }
+      printf("radioOut = %d\n", radioOut);
+      printfflush();
+      msg = radioQueue[radioOut];
+      if (call AMSend.send(AM_BROADCAST_ADDR, msg, sizeof(oscilloscope_t)) == SUCCESS) {
+        report_sent();
+      } else {
+        failBlink();
+        post radioSendTask();
+      }
+    }
+  }
 
   /* Current local state - interval, version and accumulated readings */
   oscilloscope_t local;
 
   uint8_t reading; /* 0 to NREADINGS */
 
-  // Use LEDs to report various status issues.
-  void report_problem() { call Leds.led0Toggle(); printf("can not read data from senser\n");}
-  void report_sent() { call Leds.led1Toggle(); printf("sent packet\n"); }
-  void report_received() { call Leds.led2Toggle(); }
-  void dropBlink() { call Leds.led0Toggle(); printf("drop packet\n"); }
-
   event void Boot.booted() {
+    uint8_t i;
+    for (i = 0; i < RADIO_QUEUE_LEN; i++)
+      radioQueue[i] = &radioQueueBufs[i];
+    radioIn = radioOut = 0;
+    radioBusy = FALSE;
+    radioFull = TRUE;
+
+    // 设置采样频率
     local.interval = DEFAULT_INTERVAL;
+    // 设置节点id
     local.id = TOS_NODE_ID;
     local.count = -1;
     local.version = 0;
     local.token = TOKEN_SECRET_MOTE;
-    sendBusy = FALSE;
     if (call RadioControl.start() != SUCCESS)
       report_problem();
   }
 
   void startTimer() {
+    // 设置采样定时器
     call Timer.startPeriodic(local.interval);
     reading = 0;
   }
 
   event void RadioControl.startDone(error_t error) {
-    startTimer();
+    if (error == SUCCESS) {
+      radioFull = FALSE;
+      startTimer();
+    }
   }
 
   event void RadioControl.stopDone(error_t error) {}
 
   // receive message from radio
   event message_t* Receive.receive(message_t* msg, void* payload, uint8_t len) {
+    message_t *ret = msg;
     oscilloscope_t *omsg = payload;
 
-    /* If we receive a newer version, update our interval.*/
+    /* If we receive a newer version, update our interval. */
     if (len == sizeof(oscilloscope_t) && omsg->token == TOKEN_SECRET_PC && omsg->version > local.version) {
       local.version = omsg->version;
       local.interval = omsg->interval;
-       // restart timer
       startTimer();
-      // report_problem();
       report_received();
     }
 
@@ -76,26 +122,28 @@ implementation
      - read next sample
   */
   event void Timer.fired() {
+    message_t *ret;
     if (reading == NREADINGS) {
-      if (sendBusy) {
-        dropBlink();
-      }
-      if (!sendBusy && sizeof local <= call AMSend.maxPayloadLength()) {
-        // Don't need to check for null because we've already checked length
-        // 将 local 信息转存到发送信息中
-        memcpy(call AMSend.getPayload(&sendBuf, sizeof(local)), &local, sizeof local);
-        if (call AMSend.send(AM_BROADCAST_ADDR, &sendBuf, sizeof local) == SUCCESS) {
-          sendBusy = TRUE;
+      memcpy(call AMSend.getPayload(&sendBuf, sizeof(local)), &local, sizeof local);
+      atomic {
+        if (!radioFull) {
+          ret = radioQueue[radioIn];
+          *radioQueue[radioIn] = sendBuf;
+          radioIn = (radioIn + 1) % RADIO_QUEUE_LEN;
+          if (radioIn == radioOut) {
+            radioFull = TRUE;
+          }
+          if (!radioBusy) {
+            post radioSendTask();
+            radioBusy = TRUE;
+          }
+        } else {
+          dropBlink();
         }
       }
-      if (!sendBusy) {
-        report_problem();
-      }
-      reading = 0;
+     reading = 0;
     }
-
     local.count++;
-
     if (call ReadLight.read() != SUCCESS)
       report_problem();
     if (call ReadTemperature.read() != SUCCESS)
@@ -107,12 +155,19 @@ implementation
   }
 
   event void AMSend.sendDone(message_t* msg, error_t error) {
-    if (error == SUCCESS) {
-      report_sent();
+    if (error != SUCCESS) {
+      failBlink();
     } else {
-      report_problem();
+      atomic
+      if (msg == radioQueue[radioOut]) {
+        // 更新 radioOut
+        if (++radioOut >= RADIO_QUEUE_LEN)
+          radioOut = 0;
+        if (radioFull)
+          radioFull = FALSE;
+       }
     }
-    sendBusy = FALSE;
+    post radioSendTask();
   }
 
   event void ReadTemperature.readDone(error_t result, uint16_t data) {
