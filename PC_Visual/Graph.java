@@ -176,8 +176,8 @@ class Graph extends JPanel
 
     /* Next point in mote's graph is at x value gx, screen coordinate sx */
     void nextPoint(Graphics g, int gx, int sx) {
-        int gy = -1;
-        int sy = -1;
+        double gy = -275;
+        int sy = -275;
         SensorData sample = parent.parent.data.getData(nodeId, gx);
 
         if (sample != null) {
@@ -194,7 +194,7 @@ class Graph extends JPanel
             }
         }
 
-        if (gy >= 0) { // Ignore missing values
+        if (gy > -275) { // Ignore missing values
         double rsy = height - yscale * (gy - gy0);
 
         // Ignore problem values
@@ -202,7 +202,7 @@ class Graph extends JPanel
             sy = (int)(rsy + 0.5);
         }
 
-        if (lastsy >= 0 && sy >= 0) {
+        if (lastsy > -275 && sy > -275) {
             g.drawLine(lastsx, lastsy, sx, sy);
         }
         }
@@ -252,8 +252,10 @@ class Graph extends JPanel
     /* User attempted to set Y-axis range to newy0..newy1. Refuse bogus
        values (return false), or accept, redraw and return true. */
     boolean setYAxis(int newy0, int newy1) {
-    if (newy0 >= newy1 || newy0 < 0 || newy0 > 65535 ||
-        newy1 < 0 || newy1 > 65535) {
+      int miny = parent.getProperMinY();
+    	int maxy = parent.getProperMaxY();
+    if (newy0 >= newy1 || newy0 < miny || newy0 > maxy ||
+        newy1 < miny || newy1 > maxy) {
         return false;
     }
     gy0 = newy0;

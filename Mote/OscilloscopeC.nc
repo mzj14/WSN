@@ -27,9 +27,10 @@ implementation
   uint8_t reading; /* 0 to NREADINGS */
 
   // Use LEDs to report various status issues.
-  void report_problem() { call Leds.led0Toggle(); printf("can not read data from senser");}
-  void report_sent() { call Leds.led1Toggle(); }
+  void report_problem() { call Leds.led0Toggle(); printf("can not read data from senser\n");}
+  void report_sent() { call Leds.led1Toggle(); printf("sent packet\n"); }
   void report_received() { call Leds.led2Toggle(); }
+  void dropBlink() { call Leds.led0Toggle(); printf("drop packet\n"); }
 
   event void Boot.booted() {
     local.interval = DEFAULT_INTERVAL;
@@ -76,6 +77,9 @@ implementation
   */
   event void Timer.fired() {
     if (reading == NREADINGS) {
+      if (sendBusy) {
+        dropBlink();
+      }
       if (!sendBusy && sizeof local <= call AMSend.maxPayloadLength()) {
         // Don't need to check for null because we've already checked length
         // 将 local 信息转存到发送信息中

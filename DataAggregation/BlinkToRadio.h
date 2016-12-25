@@ -6,7 +6,10 @@
 enum {
     ARRAY_SIZE = 2000,
     GROUP_ID = 6,
-    AM_BLINKTORADIO = 0
+    AM_BLINKTORADIO = 0,
+    MIN_MYID = 17,
+    MAX_MYID = 18,
+    SERVER_ID = 1000
 };
 
 typedef nx_struct ack {

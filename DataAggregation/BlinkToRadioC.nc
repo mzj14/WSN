@@ -69,7 +69,7 @@ implementation {
         *(m_flag + offset / 8) &= ~(1 << (7 - offset % 8));
     }
     bool received_everything() {
-        return m_len == ARRAY_SIZE ; // && m_cont == m_len;
+        return m_len == ARRAY_SIZE; // && m_cont == m_len;
     }
     void commit_source(source_t src) {
         uint16_t i;
@@ -135,12 +135,14 @@ implementation {
             return;
         }
         update_max_continuous();
-        printf("[A] Fired: m_cont(%d) m_len(%d) busy(%d).\n", m_cont, m_len, busy);
+        printf("[A] Fired: m_cont(%d) m_len(%d) busy(%d).\n", m_cont, m_len,
+               busy);
         if (m_cont != m_len && !busy) {
             m_req.index = m_cont + 1;
             printf("[A] Trying to get %d seq.\n", m_req.index);
             printfflush();
-            memcpy(call AMSend.getPayload(&req_buf, sizeof(m_req)), &m_req, sizeof(m_req));
+            memcpy(call AMSend.getPayload(&req_buf, sizeof(m_req)), &m_req,
+                   sizeof(m_req));
             if (call AMSend.send(AM_BROADCAST_ADDR, &req_buf,
                                  sizeof(request_t)) == SUCCESS) {
                 busy = TRUE;
@@ -158,23 +160,28 @@ implementation {
     }
     event message_t *Receive.receive(message_t * msg, void *payload,
                                      uint8_t len) {
-call Leds.led0Toggle();
+        am_addr_t id = call source(msg);
+        if (id != SERVER_ID && !(id <= MAX_MYID && id >= MIN_MYID))
+            return msg;
+        call Leds.led0Toggle();
         if (len == sizeof(source_t)) {
             source_t *pkt_source = (source_t *)payload;
             commit_source(*pkt_source);
             update_max_continuous();
-            printf("[A] Received seq(%d) int(%d).", pkt_source->sequence_number, pkt_source->random_integer);
+            printf("[A] Received seq(%d) int(%d).", pkt_source->sequence_number,
+                   pkt_source->random_integer);
             if (answer_acked == FALSE && received_everything()) {
-		    call Leds.led2Toggle();
+                call Leds.led2Toggle();
                 if (!busy) {
-                    //answer_acked = TRUE;
+                    // answer_acked = TRUE;
                     gen_response();
                     printf(
                         "max=%ld, min=%ld, median=%ld, average=%ld, sum=%ld\n",
                         m_ans.max, m_ans.min, m_ans.median, m_ans.average,
                         m_ans.sum);
 
-                    memcpy(call AMSend.getPayload(&send_buf, sizeof(m_ans)), &m_ans, sizeof m_ans);
+                    memcpy(call AMSend.getPayload(&send_buf, sizeof(m_ans)),
+                           &m_ans, sizeof m_ans);
 
                     dump_package((void *)(&m_ans), sizeof(m_ans));
                     if (call AMSend.send(AM_BROADCAST_ADDR, &send_buf,
@@ -185,11 +192,11 @@ call Leds.led0Toggle();
             }
         } else if (len == sizeof(ack_t)) {
             ack_t *pkt_ack = (ack_t *)payload;
-	    printf("ACK, \n");
+            printf("ACK, \n");
             if (pkt_ack->group_id == GROUP_ID) {
-		    printf("ACK \n");
+                printf("ACK \n");
                 answer_acked = TRUE;
-call 		Leds.led1Toggle();
+                call Leds.led1Toggle();
             }
         }
         return msg;

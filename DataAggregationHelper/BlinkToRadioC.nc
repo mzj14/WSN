@@ -31,24 +31,14 @@ implementation {
     void commit_source(source_t src) {
         uint16_t i;
         if (src.sequence_number % 100 == 0) {
-
             printf("SEQ %d: %ld\r\n", src.sequence_number, src.random_integer);
             printfflush();
         }
-        if (check_bit(src.sequence_number))
+        if (check_bit(src.sequence_number - 1))
             return;
-
-        for (i = 0; i < m_len; i++)
-            if (*(m_data + i) > src.random_integer)
-                break;
-        memmove(m_data + i + 1, m_data + i, (m_len - i) * sizeof(uint32_t));
         m_len += 1;
-        *(m_data + i) = src.random_integer;
-        set_bit(src.sequence_number);
-        /*
-        if (m_len == ARRAY_SIZE)
-                post sort_task();
-         */
+        *(m_data + src.sequence_number - 1) = src.random_integer;
+        set_bit(src.sequence_number - 1);
     }
     bool busy = FALSE;
 
@@ -79,34 +69,29 @@ implementation {
     }
     event message_t *Receive.receive(message_t * msg, void *payload,
                                      uint8_t len) {
-	source_t* resp;
+        source_t *resp;
+        am_addr_t id = call source(msg);
+        if (id != SERVER_ID && id != MY_BOSS)
+            return msg;
         if (len == sizeof(source_t)) {
             source_t *pkt_source = (source_t *)payload;
             commit_source(*pkt_source);
         } else if (len == sizeof(request_t)) {
             request_t *pkt_request = (request_t *)payload;
-
-            if (pkt_request->token == TOKEN) {
-		    uint16_t seq = pkt_request->index;
-		    printf("#%d", seq);
-		    printfflush();
-		    if (check_bit(seq)){
-			    printf(", HIT\n");
-			    resp = (source_t*)(call Packet.getPayload(&resppkt, sizeof(source_t)));
-			    resp->token = TOKEN;
-			    resp->random_integer = m_data[seq];
-			    resp->sequence_number = seq;
-
-			    if (call AMSend.send(AM_BROADCAST_ADDR, &resppkt, sizeof(response_t)) == SUCCESS) {
-				    busy = TRUE;
-			    }
-		    }else{
-			    printf(", MISS=====\n");
-		    
-		    }
-
-		    printfflush();
+            uint16_t seq = pkt_request->index;
+            if (check_bit(seq - 1)) {
+                resp = (source_t *)(call Packet.getPayload(&resppkt,
+                                                           sizeof(source_t)));
+                resp->random_integer = m_data[seq - 1];
+                resp->sequence_number = seq;
+                if (call AMSend.send(AM_BROADCAST_ADDR, &resppkt,
+                                     sizeof(source_t)) == SUCCESS) {
+                    busy = TRUE;
+                }
+            } else {
+                printf(", MISS=====\n");
             }
+            printfflush();
         }
         return msg;
     }

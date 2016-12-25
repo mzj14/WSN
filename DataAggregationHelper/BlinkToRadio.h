@@ -7,7 +7,8 @@ enum {
     ARRAY_SIZE = 2000,
     GROUP_ID = 6,
     AM_BLINKTORADIO = 0,
-    TOKEN = 233
+    SERVER_ID = 1000,
+    MY_BOSS = 16
 };
 
 typedef nx_struct source {
@@ -16,20 +17,9 @@ typedef nx_struct source {
 }
 source_t;
 
-
 typedef nx_struct request {
-    nx_uint32_t token;
     nx_uint16_t index;
 }
 request_t;
-
-typedef nx_struct response {
-    nx_uint16_t sequence_number;
-    nx_uint32_t random_integer;
-    nx_uint32_t token;
-}
-response_t;
-
-
 
 #endif

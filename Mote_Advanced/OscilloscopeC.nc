@@ -51,7 +51,7 @@ implementation
           return;
       }
       printf("radioOut = %d\n", radioOut);
-      printfflush(); 
+      printfflush();
       msg = radioQueue[radioOut];
       if (call AMSend.send(AM_BROADCAST_ADDR, msg, sizeof(oscilloscope_t)) == SUCCESS) {
         report_sent();
@@ -81,7 +81,7 @@ implementation
     local.id = TOS_NODE_ID;
     local.count = -1;
     local.version = 0;
-    local.token = TOKEN_SECRET_RELAY;
+    local.token = TOKEN_SECRET_MOTE;
     if (call RadioControl.start() != SUCCESS)
       report_problem();
   }
@@ -112,38 +112,8 @@ implementation
       local.interval = omsg->interval;
       startTimer();
       report_received();
-      return msg;
     }
 
-    if (len != sizeof(oscilloscope_t) || omsg->token != TOKEN_SECRET_MOTE) {
-       // report_received();
-       // printf("%d, %ld\n", omsg->id, omsg->token);
-       // printfflush();
-       return msg;
-    }
-
-    // Now we know that the message is from our partner
-    omsg->token = TOKEN_SECRET_RELAY;
-    report_received();
-    // we need to send the message to basestation for out partner
-    // 原子操作，不可被打断
-    atomic {
-      if (!radioFull) {
-        ret = radioQueue[radioIn];
-        radioQueue[radioIn] = msg;
-        // radioIn 指向下一个包的位置
-        radioIn = (radioIn + 1) % RADIO_QUEUE_LEN;
-        if (radioIn == radioOut) {
-          radioFull = TRUE;
-        }
-        if (!radioBusy) {
-          post radioSendTask();
-          radioBusy = TRUE;
-        }
-      } else {
-        dropBlink();
-      }
-    }
     return msg;
   }
 
