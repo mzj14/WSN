@@ -70,7 +70,7 @@ implementation {
     event message_t *Receive.receive(message_t * msg, void *payload,
                                      uint8_t len) {
         source_t *resp;
-        am_addr_t id = call source(msg);
+        am_addr_t id = call AMPacket.source(msg);
         if (id != SERVER_ID && id != MY_BOSS)
             return msg;
         if (len == sizeof(source_t)) {
