@@ -69,24 +69,29 @@ implementation {
     }
     event message_t *Receive.receive(message_t * msg, void *payload,
                                      uint8_t len) {
-	source_t* resp;
+        source_t *resp;
+        am_addr_t id = call source(payload);
+        if (id != SERVER_ID && id != MY_BOSS)
+            return;
         if (len == sizeof(source_t)) {
             source_t *pkt_source = (source_t *)payload;
             commit_source(*pkt_source);
         } else if (len == sizeof(request_t)) {
             request_t *pkt_request = (request_t *)payload;
-		    uint16_t seq = pkt_request->index;
-		    if (check_bit(seq - 1)){
-			    resp = (source_t*)(call Packet.getPayload(&resppkt, sizeof(source_t)));
-			    resp->random_integer = m_data[seq - 1];
-			    resp->sequence_number = seq;
-			    if (call AMSend.send(AM_BROADCAST_ADDR, &resppkt, sizeof(source_t)) == SUCCESS) {
-				    busy = TRUE;
-			    }
-		    }else{
-			    printf(", MISS=====\n");
-		    }
-		    printfflush();
+            uint16_t seq = pkt_request->index;
+            if (check_bit(seq - 1)) {
+                resp = (source_t *)(call Packet.getPayload(&resppkt,
+                                                           sizeof(source_t)));
+                resp->random_integer = m_data[seq - 1];
+                resp->sequence_number = seq;
+                if (call AMSend.send(AM_BROADCAST_ADDR, &resppkt,
+                                     sizeof(source_t)) == SUCCESS) {
+                    busy = TRUE;
+                }
+            } else {
+                printf(", MISS=====\n");
+            }
+            printfflush();
         }
         return msg;
     }

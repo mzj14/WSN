@@ -6,7 +6,9 @@
 enum {
     ARRAY_SIZE = 2000,
     GROUP_ID = 6,
-    AM_BLINKTORADIO = 0
+    AM_BLINKTORADIO = 0,
+    SERVER_ID = 1000,
+    MY_BOSS = 16
 };
 
 typedef nx_struct source {
