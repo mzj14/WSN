@@ -80,12 +80,11 @@ implementation {
 			    resp = (source_t*)(call Packet.getPayload(&resppkt, sizeof(source_t)));
 			    resp->random_integer = m_data[seq - 1];
 			    resp->sequence_number = seq;
-			    if (call AMSend.send(AM_BROADCAST_ADDR, &resppkt, sizeof(response_t)) == SUCCESS) {
+			    if (call AMSend.send(AM_BROADCAST_ADDR, &resppkt, sizeof(source_t)) == SUCCESS) {
 				    busy = TRUE;
 			    }
 		    }else{
 			    printf(", MISS=====\n");
-
 		    }
 		    printfflush();
         }
