@@ -160,9 +160,9 @@ implementation {
     }
     event message_t *Receive.receive(message_t * msg, void *payload,
                                      uint8_t len) {
-        am_addr_t id = call source(payload);
+        am_addr_t id = call source(msg);
         if (id != SERVER_ID && !(id <= MAX_MYID && id >= MIN_MYID))
-            return;
+            return msg;
         call Leds.led0Toggle();
         if (len == sizeof(source_t)) {
             source_t *pkt_source = (source_t *)payload;

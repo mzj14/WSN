@@ -70,9 +70,9 @@ implementation {
     event message_t *Receive.receive(message_t * msg, void *payload,
                                      uint8_t len) {
         source_t *resp;
-        am_addr_t id = call source(payload);
+        am_addr_t id = call source(msg);
         if (id != SERVER_ID && id != MY_BOSS)
-            return;
+            return msg;
         if (len == sizeof(source_t)) {
             source_t *pkt_source = (source_t *)payload;
             commit_source(*pkt_source);
