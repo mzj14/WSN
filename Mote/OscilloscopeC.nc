@@ -77,9 +77,6 @@ implementation
   */
   event void Timer.fired() {
     if (reading == NREADINGS) {
-      if (sendBusy) {
-        dropBlink();
-      }
       if (!sendBusy && sizeof local <= call AMSend.maxPayloadLength()) {
         // Don't need to check for null because we've already checked length
         // 将 local 信息转存到发送信息中
