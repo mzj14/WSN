@@ -33,8 +33,8 @@ class Window {
     public static final int HUMIDITY = 1;
     public static final int LIGHT = 2;
 
-    public static final int[] yMinValue = {-45, 0, -20};
-    public static final int[] yMaxValue = {125, 150, 200};
+    public static final int[] yMinValue = {-450, 0, -20};
+    public static final int[] yMaxValue = {1250, 1000, 200};
 
     Window(Oscilloscope parent) {
 	this.parent = parent;

@@ -12,22 +12,22 @@ public class SensorData {
 		this.current_time = current_time;
 	}
 
+  // transfer to Celcius * 10
 	public double getPhysicalTemp() {
 		int SOT = this.temperature & 16383;
-	  return (-39.6 + 0.01 * SOT);
-		// return this.temperature;
+	  return (-39.6 + 0.01 * SOT) * 10;
 	}
 
+  // transfer to Relatively Humidity * 10
 	public double getPhysicalHumid() {
 		int SORH = this.humidity & 4095;
 		double temp = this.getPhysicalTemp();
 		double linear = -4 + 0.0405 * SORH - 2.8e-6 * SORH * SORH;
-		return ((temp - 25) * (0.01 + 0.00008 * SORH) + linear);
-		// return this.humidity;
+		return linear * 10;
 	}
 
+  // putout raw value
 	public double getPhysicalLight() {
-		return (0.085 * this.light);
-		// return this.light;
+		return this.light;
 	}
 }
