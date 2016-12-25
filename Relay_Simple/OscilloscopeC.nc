@@ -107,7 +107,7 @@ implementation
     oscilloscope_t *omsg = payload;
 
     /* If we receive a newer version, update our interval. */
-    if (len == sizeof(oscilloscope_t) && omsg->token == TOKEN_SECRET_PC && omsg->version > local.version) {
+    if (len == sizeof(oscilloscope_t) && omsg->token == TOKEN_SECRET_PC && omsg->version > local.version && omsg->interval >= 50) {
       local.version = omsg->version;
       local.interval = omsg->interval;
       startTimer();

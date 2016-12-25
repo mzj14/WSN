@@ -6,7 +6,7 @@ implementation
   components new HamamatsuS1087ParC() as LightSensor;
   components new SensirionSht11C() as TmpHumSensor;
   components PrintfC;
-  components SerialStartC;
+  // components SerialStartC;
 
   OscilloscopeC.Boot -> MainC;
   OscilloscopeC.RadioControl -> ActiveMessageC;

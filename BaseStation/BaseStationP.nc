@@ -114,9 +114,9 @@ implementation
   message_t* receive(message_t *msg, void *payload, uint8_t len) {
     message_t *ret = msg;
     oscilloscope_t* omsg = (oscilloscope_t*)payload;
-    
+
     // report_received();
-    if (len != sizeof(oscilloscope_t) || ((oscilloscope_t*)payload)->token != TOKEN_SECRET_RELAY) {
+    if (len != sizeof(oscilloscope_t) || omsg->token != TOKEN_SECRET_RELAY || omsg->interval < 50) {
         return msg;
     }
 
